@@ -1,7 +1,7 @@
 package upload.board.config;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.dialect.MariaDB102Dialect;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -27,7 +29,7 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 
 @Configuration
 @RequiredArgsConstructor
-public class WebOAuthSecurityConfig {
+public class WebOAuthSecurityConfig  {
     private final OAuth2UserCustomService oAuth2UserCustomService;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -37,8 +39,10 @@ public class WebOAuthSecurityConfig {
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring()
                 .requestMatchers(toH2Console())
-                .requestMatchers("/img/**", "/js/**");
+                .antMatchers("/img/**", "/js/**");
     }
+
+
 
 
 
@@ -56,10 +60,11 @@ public class WebOAuthSecurityConfig {
 
 
         http.authorizeRequests()
-                .requestMatchers(toH2Console()).permitAll()
-                .requestMatchers("/api/token").permitAll()
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll();
+                .requestMatchers(toH2Console()).permitAll() // H2 콘솔 요청에 대해 모든 사용자에게 허용
+                .antMatchers("/api/token").permitAll() // "/api/token" 경로에 대해 모든 사용자에게 허용
+                .antMatchers("/api/**").authenticated() // "/api/"로 시작하는 모든 경로에 대해 인증된 사용자에게 허용
+                .anyRequest().permitAll(); // 나머지 모든 요청에 대해 모든 사용자에게 허용
+
 
         http.oauth2Login()
                 .loginPage("/login")
