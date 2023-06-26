@@ -56,6 +56,7 @@ public class WebOAuthSecurityConfig {
 
 
         http.authorizeRequests()
+                .requestMatchers(toH2Console()).permitAll()
                 .requestMatchers("/api/token").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll();
